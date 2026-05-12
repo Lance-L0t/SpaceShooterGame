@@ -11,6 +11,7 @@ class Player {
     this.y = y;
     this.width = 40;
     this.height = 40;
+    this.health = 3;
     this.handleClickEvents();
     this.movement = {
       left: false,
@@ -25,6 +26,10 @@ class Player {
     this.bulletSpeed = 10;
     this.bulletList = [];
     this.enemyList = [];
+    this.showEnemy = false;
+    this.isGameOver = false;
+    this.frames = 0;
+    this.framesPerEnemy = 30;
   }
   drawPlayer() {
     ctx.fillStyle = "lime";
@@ -41,6 +46,7 @@ class Player {
       if (e.key === "ArrowUp") {
         this.fire = true;
       }
+      this.showEnemy = true;
     });
     window.addEventListener("keyup", (e) => {
       if (e.key === "ArrowLeft") {
@@ -95,22 +101,35 @@ class Player {
         this.bulletList.splice(index, 1);
       }
     });
+    
+
+  }
+  checkEnemyCollision(){
+    //Has a problem
+    this.enemyList.forEach((enemy)=>{
+      if((this.y + this.height) < (enemy.y + enemy.height) && this.y < enemy.y){
+        this.isGameOver = true;
+        console.log(this.isGameOver);
+      }
+    })
   }
   enemySpawn() {
-    if (this.enemyList.length < 10) 
-      {
-      this.enemyList.push(new Enemy(Math.floor(Math.random() * canvas.width), -40));
-      console.log(this.enemyList.length);
+    this.frames++;
+    if (this.frames >= this.framesPerEnemy){
+      this.enemyList.push(new Enemy());
+      this.frames = 0;
+      this.framesPerEnemy = Math.floor(Math.random() * 30);
     }
-    this.enemyList.forEach((en ,index) => {
-      en.updateEnemy();
-    });
+    this.enemyList.forEach((enemy)=>{
+      enemy.updateEnemy();
+    })
   }
   update() {
     this.drawPlayer();
     this.movePlayer();
     this.enemySpawn();
     this.fireBullet();
+    this.checkEnemyCollision();
     this.wallCollision();
   }
 }
@@ -136,10 +155,10 @@ class Bullet {
 //Enemy
 class Enemy {
   constructor(x, y) {
-    this.x = x;
-    this.y = y;
     this.width = 40;
     this.height = 40;
+    this.x = Math.floor(Math.random() * canvas.width - this.width);
+    this.y = -this.height;
     this.enemySpeed = 5;
   }
   drawEnemy() {
@@ -148,7 +167,7 @@ class Enemy {
   }
   updateEnemy(){
     this.drawEnemy();
-    this.y += this.enemySpeed
+    this.y += this.enemySpeed;
   }
 }
 
